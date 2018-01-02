@@ -23,10 +23,17 @@
 
 #include<ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+
+#include <geometry_msgs/PoseArray.h>
+#include <std_msgs/Int16.h>
+#include <std_msgs/Int16MultiArray.h>
+#include <std_msgs/Float64MultiArray.h>
 
 #include"Map.h"
 #include"MapPoint.h"
 #include"KeyFrame.h"
+#include"Converter.h"
 
 namespace ORB_SLAM
 {
@@ -44,6 +51,10 @@ public:
     void PublishCurrentCamera(const cv::Mat &Tcw);
     void SetCurrentCameraPose(const cv::Mat &Tcw);
 
+    void PublishPose(const cv::Mat &Tcw); // LYS
+    void PublishKfid(int delKfid, int addKfid);
+    void PublishKFPose(const vector<KeyFrame*> &vpKFs);
+
 private:
 
     cv::Mat GetCurrentCameraPose();
@@ -53,6 +64,13 @@ private:
     ros::NodeHandle nh;
     ros::Publisher publisher;
 
+    ros::Publisher pose_pub;
+    ros::Publisher KFPose_pub, KFWorldPose_pub, ExtraPose_pub;
+    ros::Publisher KFTime_pub;
+    ros::Publisher KFWorldStatus_pub;
+    ros::Publisher KFId_pub;
+    ros::Publisher All4FrameCalib_pub;
+
     visualization_msgs::Marker mPoints;
     visualization_msgs::Marker mReferencePoints;
     visualization_msgs::Marker mKeyFrames;
@@ -60,6 +78,12 @@ private:
     visualization_msgs::Marker mCovisibilityGraph;
     visualization_msgs::Marker mMST;
     visualization_msgs::Marker mCurrentCamera;
+
+    geometry_msgs::PoseWithCovarianceStamped mPose;
+    geometry_msgs::PoseArray mKFPoseArray, mKFWorldPoseArray, mExtraPoseArray; // YS
+    std_msgs::Int16MultiArray mKFWorldStatusArray, mKFIdArray;
+    std_msgs::Float64MultiArray mKFTimeArray;
+    std_msgs::Float64MultiArray mAll4FrameCalibArray;
 
     float fCameraSize;
     float fPointSize;

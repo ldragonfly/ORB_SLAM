@@ -64,7 +64,6 @@
 
 #include <ros/ros.h>
 
-
 using namespace cv;
 using namespace std;
 
@@ -527,6 +526,9 @@ void ORBextractor::ComputeKeyPoints(vector<vector<KeyPoint> >& allKeypoints)
 
     float imageRatio = (float)mvImagePyramid[0].cols/mvImagePyramid[0].rows;
 
+    int totalPts = 0; // size
+    static int count = 0;
+
     for (int level = 0; level < nlevels; ++level)
     {
         const int nDesiredFeatures = mnFeaturesPerLevel[level];
@@ -695,11 +697,21 @@ void ORBextractor::ComputeKeyPoints(vector<vector<KeyPoint> >& allKeypoints)
                 }
             }
         }
+
         if((int)keypoints.size()>nDesiredFeatures)
         {
             KeyPointsFilter::retainBest(keypoints,nDesiredFeatures);
             keypoints.resize(nDesiredFeatures);
         }
+	totalPts += (int)keypoints.size();
+    }
+	
+
+    // LYS
+    count++;
+    if(count%20==0)
+    {
+   	cout<<"found : "<<totalPts<<'\t';
     }
 
     // and compute orientations

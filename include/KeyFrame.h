@@ -46,6 +46,11 @@ class KeyFrame
 public:
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
 
+    // YS
+    double KFWorldPos[3], KFWorldQuat[4], extraPos[3], extraQuat[4];
+    double mTime;
+    int is_world_tracking;
+
     // Pose functions
     void SetPose(const cv::Mat &Rcw,const cv::Mat &tcw);
     void SetPose(const cv::Mat &Tcw);
@@ -54,6 +59,11 @@ public:
     cv::Mat GetCameraCenter();
     cv::Mat GetRotation();
     cv::Mat GetTranslation();
+
+    int GetIs_world_tracking(); //LYS
+    double GetmTime();
+    int GetmnId();
+    cv::Mat GetPose(int& mnId_out);
 
     // Calibration
     cv::Mat GetProjectionMatrix();

@@ -54,6 +54,10 @@ public:
     std::vector<KeyFrame*> GetReferenceKeyFrames();
     std::vector<MapPoint*> GetReferenceMapPoints();
 
+    int delKfid, addKfid; //YS
+    double curWorldPos[3], curWorldQuat[4], curExtraPos[3], curExtraQuat[4];
+    int is_world_tracking;
+
     int MapPointsInMap();
     int KeyFramesInMap();
 

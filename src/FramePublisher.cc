@@ -177,6 +177,13 @@ void FramePublisher::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
         s << " LOADING ORB VOCABULARY. PLEASE WAIT...";
     }
 
+
+    //LYS
+    static int count = 0;
+    count++;
+    if(count%20==0)
+	cout<<s.str()<<'\t'<<endl;
+
     int baseline=0;
     cv::Size textSize = cv::getTextSize(s.str(),cv::FONT_HERSHEY_PLAIN,1,1,&baseline);
 

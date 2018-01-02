@@ -50,7 +50,20 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
             mGrid[i][j] = F.mGrid[i][j];
     }
 
-    SetPose(F.mTcw);    
+    SetPose(F.mTcw);   
+
+	for(int i=0; i<3; i++) 
+	{
+		KFWorldPos[i] = pMap->curWorldPos[i];	//YS
+		extraPos[i] = pMap->curExtraPos[i];	//YS
+	}
+	for(int i=0; i<4; i++) 
+	{
+		KFWorldQuat[i] = pMap->curWorldQuat[i]; 
+		extraQuat[i] = pMap->curExtraQuat[i]; 
+	}
+	is_world_tracking = pMap->is_world_tracking; 
+    mTime = ros::Time::now().toSec();
 }
 
 void KeyFrame::ComputeBoW()
@@ -88,6 +101,13 @@ cv::Mat KeyFrame::GetPose()
     return Tcw.clone();
 }
 
+cv::Mat KeyFrame::GetPose(int& mnId_out)
+{
+    mnId_out = mnId;
+    boost::mutex::scoped_lock lock(mMutexPose);
+    return Tcw.clone();
+}
+
 cv::Mat KeyFrame::GetPoseInverse()
 {
     boost::mutex::scoped_lock lock(mMutexPose);
@@ -121,6 +141,22 @@ cv::Mat KeyFrame::GetTranslation()
 {
     boost::mutex::scoped_lock lock(mMutexPose);
     return Tcw.rowRange(0,3).col(3).clone();
+}
+
+int KeyFrame::GetIs_world_tracking() //LYS
+{
+    boost::mutex::scoped_lock lock(mMutexPose);
+    return is_world_tracking;
+}
+double KeyFrame::GetmTime() //LYS
+{
+    boost::mutex::scoped_lock lock(mMutexPose);
+    return mTime;
+}
+int KeyFrame::GetmnId() //LYS
+{
+    boost::mutex::scoped_lock lock(mMutexPose);
+    return mnId;
 }
 
 void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight)

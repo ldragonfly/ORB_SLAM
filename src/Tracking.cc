@@ -160,10 +160,45 @@ void Tracking::SetKeyFrameDatabase(KeyFrameDatabase *pKFDB)
 void Tracking::Run()
 {
     ros::NodeHandle nodeHandler;
+
+    ros::Subscriber sub2 = nodeHandler.subscribe("/estimator/pose4calib", 200, &Tracking::worldPose, this);
+    ros::Subscriber sub3 = nodeHandler.subscribe("/estimator/is_worldPose_valid", 200, &Tracking::is_worldPose_valid, this);
+    ros::Subscriber sub4 = nodeHandler.subscribe("/estimator/extraPose", 200, &Tracking::poseExtra, this);
+
     ros::Subscriber sub = nodeHandler.subscribe("/camera/image_raw", 1, &Tracking::GrabImage, this);
 
     ros::spin();
 }
+
+
+void Tracking::worldPose(const geometry_msgs::PoseStamped& msg_worldPose) //YS
+{
+	mpMap-> curWorldPos[0] = msg_worldPose.pose.position.x;
+	mpMap-> curWorldPos[1] = msg_worldPose.pose.position.y;
+	mpMap-> curWorldPos[2] = msg_worldPose.pose.position.z;
+	mpMap-> curWorldQuat[0] = msg_worldPose.pose.orientation.x;
+	mpMap-> curWorldQuat[1] = msg_worldPose.pose.orientation.y;
+	mpMap-> curWorldQuat[2] = msg_worldPose.pose.orientation.z;
+	mpMap-> curWorldQuat[3] = msg_worldPose.pose.orientation.w;	
+}
+
+void Tracking::is_worldPose_valid(const std_msgs::Int16& msg_is_worldPose_valid)
+{
+	mpMap-> is_world_tracking = msg_is_worldPose_valid.data;	
+}
+
+void Tracking::poseExtra(const geometry_msgs::PoseStamped& msg_poseExtra) //YS
+{
+	mpMap-> curExtraPos[0] = msg_poseExtra.pose.position.x;
+	mpMap-> curExtraPos[1] = msg_poseExtra.pose.position.y;
+	mpMap-> curExtraPos[2] = msg_poseExtra.pose.position.z;
+	mpMap-> curExtraQuat[0] = msg_poseExtra.pose.orientation.x;
+	mpMap-> curExtraQuat[1] = msg_poseExtra.pose.orientation.y;
+	mpMap-> curExtraQuat[2] = msg_poseExtra.pose.orientation.z;
+	mpMap-> curExtraQuat[3] = msg_poseExtra.pose.orientation.w;	
+}
+
+
 
 void Tracking::GrabImage(const sensor_msgs::ImageConstPtr& msg)
 {

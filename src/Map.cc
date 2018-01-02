@@ -31,10 +31,21 @@ Map::Map()
 
 void Map::AddKeyFrame(KeyFrame *pKF)
 {
+   addKfid = pKF->mnId;
+
     boost::mutex::scoped_lock lock(mMutexMap);
     mspKeyFrames.insert(pKF);
     if(pKF->mnId>mnMaxKFid)
         mnMaxKFid=pKF->mnId;
+    mbMapUpdated=true;
+}
+
+void Map::EraseKeyFrame(KeyFrame *pKF)
+{
+    delKfid = pKF->mnId;
+
+    boost::mutex::scoped_lock lock(mMutexMap);
+    mspKeyFrames.erase(pKF);
     mbMapUpdated=true;
 }
 
@@ -49,13 +60,6 @@ void Map::EraseMapPoint(MapPoint *pMP)
 {
     boost::mutex::scoped_lock lock(mMutexMap);
     mspMapPoints.erase(pMP);
-    mbMapUpdated=true;
-}
-
-void Map::EraseKeyFrame(KeyFrame *pKF)
-{
-    boost::mutex::scoped_lock lock(mMutexMap);
-    mspKeyFrames.erase(pKF);
     mbMapUpdated=true;
 }
 
