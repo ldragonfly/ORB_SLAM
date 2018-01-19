@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:40fe4e9301b3e1eb13853adcd4ec94fc71d192f29e2c70031e1a652654b4e87e
-size 450
+ORB-SLAM is released under a GPLv3 license (see License-gpl.txt).
+Please see Dependencies.md for a list of all included code and library dependencies which are not property of the authors of ORB-SLAM.
+
+For a closed-source version of ORB-SLAM for commercial purposes, please contact the authors.
+
+If you use ORB-SLAM in an academic work, please cite the most relevant publication associated by visiting:
+http://webdiis.unizar.es/~raulmur/orbslam/
+
+
+
+
