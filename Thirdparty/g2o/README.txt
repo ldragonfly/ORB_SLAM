@@ -1,3 +1,3 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:86820b9510093e9794614497052775476622148414ed0ed6539168f975b5f213
-size 241
+You should have received this g2o version along with ORB-SLAM (https://github.com/raulmur/ORB_SLAM).
+See the original g2o library at: https://github.com/RainerKuemmerle/g2o
+All files included in this g2o version are BSD, see license-bsd.txt
