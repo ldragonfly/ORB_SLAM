@@ -160,10 +160,11 @@ void Tracking::SetKeyFrameDatabase(KeyFrameDatabase *pKFDB)
 void Tracking::Run()
 {
     ros::NodeHandle nodeHandler;
+	
+    pose_pub = nodeHandler.advertise<geometry_msgs::PoseStamped>("ORB_SLAM/pose", 10);
 
-    ros::Subscriber sub2 = nodeHandler.subscribe("/estimator/pose4calib", 200, &Tracking::worldPose, this);
-    ros::Subscriber sub3 = nodeHandler.subscribe("/estimator/is_worldPose_valid", 200, &Tracking::is_worldPose_valid, this);
-    ros::Subscriber sub4 = nodeHandler.subscribe("/estimator/extraPose", 200, &Tracking::poseExtra, this);
+    ros::Subscriber sub2 = nodeHandler.subscribe("/estimator/pose4calib", 1, &Tracking::worldPose, this);
+    ros::Subscriber sub3 = nodeHandler.subscribe("/estimator/is_worldPose_valid", 1, &Tracking::is_worldPose_valid, this);
 
     ros::Subscriber sub = nodeHandler.subscribe("/camera/image_raw", 1, &Tracking::GrabImage, this);
 
@@ -186,18 +187,6 @@ void Tracking::is_worldPose_valid(const std_msgs::Int16& msg_is_worldPose_valid)
 {
 	mpMap-> is_world_tracking = msg_is_worldPose_valid.data;	
 }
-
-void Tracking::poseExtra(const geometry_msgs::PoseStamped& msg_poseExtra) //YS
-{
-	mpMap-> curExtraPos[0] = msg_poseExtra.pose.position.x;
-	mpMap-> curExtraPos[1] = msg_poseExtra.pose.position.y;
-	mpMap-> curExtraPos[2] = msg_poseExtra.pose.position.z;
-	mpMap-> curExtraQuat[0] = msg_poseExtra.pose.orientation.x;
-	mpMap-> curExtraQuat[1] = msg_poseExtra.pose.orientation.y;
-	mpMap-> curExtraQuat[2] = msg_poseExtra.pose.orientation.z;
-	mpMap-> curExtraQuat[3] = msg_poseExtra.pose.orientation.w;	
-}
-
 
 
 void Tracking::GrabImage(const sensor_msgs::ImageConstPtr& msg)
@@ -282,6 +271,23 @@ void Tracking::GrabImage(const sensor_msgs::ImageConstPtr& msg)
         // If tracking were good, check if we insert a keyframe
         if(bOK)
         {
+
+			cv::Mat Twc = mCurrentFrame.mTcw.inv();
+			cv::Mat o = (cv::Mat_<float>(4,1) << 0, 0, 0, 1);
+			cv::Mat ow = Twc*o;
+			std::vector<float> q_wc = Converter::toQuaternion(Twc);
+
+			geometry_msgs::PoseStamped msgs_pose;
+			msgs_pose.pose.position.x=ow.at<float>(0);
+			msgs_pose.pose.position.y=ow.at<float>(1);
+			msgs_pose.pose.position.z=ow.at<float>(2);
+			msgs_pose.pose.orientation.x=q_wc[0];
+			msgs_pose.pose.orientation.y=q_wc[1];
+			msgs_pose.pose.orientation.z=q_wc[2];
+			msgs_pose.pose.orientation.w=q_wc[3];
+			pose_pub.publish(msgs_pose);
+
+
             mpMapPublisher->SetCurrentCameraPose(mCurrentFrame.mTcw);
 
             if(NeedNewKeyFrame())

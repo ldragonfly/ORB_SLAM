@@ -109,14 +109,7 @@ MapPublisher::MapPublisher(Map* pMap):mpMap(pMap), mbCameraUpdated(false)
     //Configure Publisher
     publisher = nh.advertise<visualization_msgs::Marker>("ORB_SLAM/Map", 10);
 
-    pose_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("ORB_SLAM/pose", 60);
-    KFPose_pub = nh.advertise<geometry_msgs::PoseArray>("ORB_SLAM/KFPose", 60);
-    KFWorldPose_pub = nh.advertise<geometry_msgs::PoseArray>("ORB_SLAM/KFWorldPose", 60);
-    ExtraPose_pub = nh.advertise<geometry_msgs::PoseArray>("ORB_SLAM/ExtraPose", 60);
-    KFWorldStatus_pub = nh.advertise<std_msgs::Int16MultiArray>("ORB_SLAM/KFWorldStatus", 60);
-    KFId_pub = nh.advertise<std_msgs::Int16MultiArray>("ORB_SLAM/KFId", 60);
-    KFTime_pub = nh.advertise<std_msgs::Float64MultiArray>("ORB_SLAM/KFTime", 60);
-    All4FrameCalib_pub = nh.advertise<std_msgs::Float64MultiArray>("ORB_SLAM/All4FrameCalib", 60);
+    All4FrameCalib_pub = nh.advertise<std_msgs::Float64MultiArray>("ORB_SLAM/All4FrameCalib", 10);
 
     publisher.publish(mPoints);
     publisher.publish(mReferencePoints);
@@ -132,8 +125,6 @@ void MapPublisher::Refresh()
        cv::Mat Tcw = GetCurrentCameraPose();
        PublishCurrentCamera(Tcw);
 
-       PublishPose(Tcw);
-
        ResetCamFlag();
     }
     if(mpMap->isMapUpdated())
@@ -145,28 +136,12 @@ void MapPublisher::Refresh()
         PublishMapPoints(vMapPoints, vRefMapPoints);   
         PublishKeyFrames(vKeyFrames);
 
- 	PublishKFPose(vKeyFrames);
+ 		PublishKFPose(vKeyFrames);
 
         mpMap->ResetUpdated();
     }    
 }
 
-
-/*
-void MapPublisher::PublishKfid(int delKfid, int addKfid)
-{
-std_msgs::Int16 mDelKfid;
-std_msgs::Int16 mAddKfid;
-
-mDelKfid.data = delKfid;
-mAddKfid.data = addKfid;
-
-
-addKfid_pub.publish(mAddKfid);
-delKfid_pub.publish(mDelKfid);
-
-}
-*/
 
 
 void MapPublisher::PublishKFPose(const vector<KeyFrame*> &vpKFs) // LYS
@@ -176,48 +151,14 @@ void MapPublisher::PublishKFPose(const vector<KeyFrame*> &vpKFs) // LYS
 
 	for(size_t i=0, iend=vpKFs.size() ;i<iend; i++)
 	{
-		//cout<<vpKFs[i]->mnId<<endl;
-
 		cv::Mat Tcw = vpKFs[i]->GetPose();
 		cv::Mat Twc = Tcw.inv();
 		cv::Mat ow = vpKFs[i]->GetCameraCenter();
 
-		geometry_msgs::Pose msgs_curKFPose, msgs_curKFWorldPose, msgs_curExtraPose;
-
 		for(int j=0; j<3; j++) pvc[j] = ow.at<float>(j);
-		msgs_curKFPose.position.x= pvc[0];
-		msgs_curKFPose.position.y= pvc[1];
-		msgs_curKFPose.position.z= pvc[2];
 
 		std::vector<float> q_wc_temp = Converter::toQuaternion(Twc);
 		for(int j=0; j<4; j++) qvc[j] = q_wc_temp[j];
-		msgs_curKFPose.orientation.x=qvc[0];
-		msgs_curKFPose.orientation.y=qvc[1];
-		msgs_curKFPose.orientation.z=qvc[2];
-		msgs_curKFPose.orientation.w=qvc[3];
-
-		msgs_curKFWorldPose.position.x= vpKFs[i]->KFWorldPos[0];
-		msgs_curKFWorldPose.position.y= vpKFs[i]->KFWorldPos[1];
-		msgs_curKFWorldPose.position.z= vpKFs[i]->KFWorldPos[2];
-		msgs_curKFWorldPose.orientation.x= vpKFs[i]->KFWorldQuat[0];
-		msgs_curKFWorldPose.orientation.y= vpKFs[i]->KFWorldQuat[1];
-		msgs_curKFWorldPose.orientation.z= vpKFs[i]->KFWorldQuat[2];
-		msgs_curKFWorldPose.orientation.w= vpKFs[i]->KFWorldQuat[3];
-
-		msgs_curExtraPose.position.x= vpKFs[i]->extraPos[0];
-		msgs_curExtraPose.position.y= vpKFs[i]->extraPos[1];
-		msgs_curExtraPose.position.z= vpKFs[i]->extraPos[2];
-		msgs_curExtraPose.orientation.x= vpKFs[i]->extraQuat[0];
-		msgs_curExtraPose.orientation.y= vpKFs[i]->extraQuat[1];
-		msgs_curExtraPose.orientation.z= vpKFs[i]->extraQuat[2];
-		msgs_curExtraPose.orientation.w= vpKFs[i]->extraQuat[3];
-
-		mKFPoseArray.poses.push_back(msgs_curKFPose);
-		mKFWorldPoseArray.poses.push_back(msgs_curKFWorldPose);	
-		mExtraPoseArray.poses.push_back(msgs_curExtraPose);
-		mKFWorldStatusArray.data.push_back(vpKFs[i]->GetIs_world_tracking());
-		mKFTimeArray.data.push_back(vpKFs[i]->GetmTime());	
-		mKFIdArray.data.push_back(vpKFs[i]->GetmnId());
 
 		for(int j=0; j<3; j++)	mAll4FrameCalibArray.data.push_back(pvc[j]);
 		for(int j=0; j<4; j++)	mAll4FrameCalibArray.data.push_back(qvc[j]);
@@ -225,61 +166,12 @@ void MapPublisher::PublishKFPose(const vector<KeyFrame*> &vpKFs) // LYS
 		for(int j=0; j<4; j++)	mAll4FrameCalibArray.data.push_back(vpKFs[i]->KFWorldQuat[j]);
 		mAll4FrameCalibArray.data.push_back(vpKFs[i]->GetIs_world_tracking());
 		mAll4FrameCalibArray.data.push_back(vpKFs[i]->GetmnId());
-		//cout<<msgs_curKFPose.position.z<<" "<<vpKFs[i]->GetmnId()<<" ";	
 	}
-
-	/*
-	mKFIdArray.data.push_back(mKFPoseArray.poses.size());
-
-   	mKFPoseArray.header.stamp = ros::Time::now();
-    	KFPose_pub.publish(mKFPoseArray);
-	mKFPoseArray.poses.clear();
-
-	mKFWorldPoseArray.header.stamp = ros::Time::now();
-	KFWorldPose_pub.publish(mKFWorldPoseArray);
-	mKFWorldPoseArray.poses.clear();
-
-	KFWorldStatus_pub.publish(mKFWorldStatusArray);
-	mKFWorldStatusArray.data.clear();
-
-	KFId_pub.publish(mKFIdArray);
-	mKFIdArray.data.clear();
-	*/
-
-	mExtraPoseArray.header.stamp = ros::Time::now();
-	ExtraPose_pub.publish(mExtraPoseArray);
-	mExtraPoseArray.poses.clear();
-
-	KFTime_pub.publish(mKFTimeArray);
-	mKFTimeArray.data.clear();
 
 	All4FrameCalib_pub.publish(mAll4FrameCalibArray);
 	mAll4FrameCalibArray.data.clear();
 }
 
-
-void MapPublisher::PublishPose(const cv::Mat &Tcw) // LYS
-{
-	
-
-    cv::Mat Twc = Tcw.inv();
-    cv::Mat o = (cv::Mat_<float>(4,1) << 0, 0, 0, 1);
-    cv::Mat ow = Twc*o; // only position
-
-    geometry_msgs::PoseWithCovarianceStamped msgs_pose;
-    msgs_pose.pose.pose.position.x=ow.at<float>(0);
-    msgs_pose.pose.pose.position.y=ow.at<float>(1);
-    msgs_pose.pose.pose.position.z=ow.at<float>(2);
-
-	std::vector<float> q_wc_temp = Converter::toQuaternion(Twc);
-
-msgs_pose.pose.pose.orientation.x=q_wc_temp[0];
-msgs_pose.pose.pose.orientation.y=q_wc_temp[1];
-msgs_pose.pose.pose.orientation.z=q_wc_temp[2];
-msgs_pose.pose.pose.orientation.w=q_wc_temp[3];
-
-	pose_pub.publish(msgs_pose);
-}
 
 
 void MapPublisher::PublishMapPoints(const vector<MapPoint*> &vpMPs, const vector<MapPoint*> &vpRefMPs)

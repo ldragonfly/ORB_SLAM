@@ -23,11 +23,6 @@
 
 #include<ros/ros.h>
 #include <visualization_msgs/Marker.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-
-#include <geometry_msgs/PoseArray.h>
-#include <std_msgs/Int16.h>
-#include <std_msgs/Int16MultiArray.h>
 #include <std_msgs/Float64MultiArray.h>
 
 #include"Map.h"
@@ -64,11 +59,6 @@ private:
     ros::NodeHandle nh;
     ros::Publisher publisher;
 
-    ros::Publisher pose_pub;
-    ros::Publisher KFPose_pub, KFWorldPose_pub, ExtraPose_pub;
-    ros::Publisher KFTime_pub;
-    ros::Publisher KFWorldStatus_pub;
-    ros::Publisher KFId_pub;
     ros::Publisher All4FrameCalib_pub;
 
     visualization_msgs::Marker mPoints;
@@ -79,10 +69,6 @@ private:
     visualization_msgs::Marker mMST;
     visualization_msgs::Marker mCurrentCamera;
 
-    geometry_msgs::PoseWithCovarianceStamped mPose;
-    geometry_msgs::PoseArray mKFPoseArray, mKFWorldPoseArray, mExtraPoseArray; // YS
-    std_msgs::Int16MultiArray mKFWorldStatusArray, mKFIdArray;
-    std_msgs::Float64MultiArray mKFTimeArray;
     std_msgs::Float64MultiArray mAll4FrameCalibArray;
 
     float fCameraSize;

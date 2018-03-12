@@ -25,8 +25,8 @@
 #include<opencv2/features2d/features2d.hpp>
 #include<sensor_msgs/Image.h>
 #include<sensor_msgs/image_encodings.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <std_msgs/Int16.h>
+#include<geometry_msgs/PoseStamped.h>
+#include<std_msgs/Int16.h>
 
 #include"FramePublisher.h"
 #include"Map.h"
@@ -96,7 +96,6 @@ protected:
 
     void worldPose(const geometry_msgs::PoseStamped& msg_worldPose);
     void is_worldPose_valid(const std_msgs::Int16& msg_is_worldPose_valid);
-    void poseExtra(const geometry_msgs::PoseStamped& msg_poseExtra);
 
     void FirstInitialization();
     void Initialize();
@@ -120,6 +119,7 @@ protected:
     bool NeedNewKeyFrame();
     void CreateNewKeyFrame();
 
+	ros::Publisher pose_pub;
 
     //Other Thread Pointers
     LocalMapping* mpLocalMapper;
@@ -144,6 +144,7 @@ protected:
     //Publishers
     FramePublisher* mpFramePublisher;
     MapPublisher* mpMapPublisher;
+
 
     //Map
     Map* mpMap;
