@@ -26,6 +26,7 @@
 #include "Map.h"
 
 #include "ros/ros.h"
+#include <image_transport/image_transport.h>
 
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
@@ -68,7 +69,8 @@ protected:
     vector<int> mvIniMatches;
 
     ros::NodeHandle mNH;
-    ros::Publisher mImagePub;
+    image_transport::ImageTransport *pIT;
+    image_transport::Publisher mImagePub;
 
     int mState;
 

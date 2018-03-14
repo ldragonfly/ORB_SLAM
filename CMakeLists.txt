@@ -45,7 +45,7 @@ src/Sim3Solver.cc
 src/Initializer.cc
 )
 rosbuild_add_boost_directories()
-rosbuild_link_boost(${PROJECT_NAME} thread)
+rosbuild_link_boost(${PROJECT_NAME} thread system)
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
